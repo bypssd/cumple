@@ -1,4 +1,4 @@
-<img width="256" height="256" alt="cumpleandy_logo" src="https://github.com/user-attachments/assets/23af8281-edb8-4eb6-bc94-028daf90b6ba" />
+<img width="2000" height="496" alt="cumpleandy_logo-horizontal" src="https://github.com/user-attachments/assets/c109ab25-12d7-47bc-a380-3b0fb4d1e4fd" />
 
 # 🎂 Hub del Cumpleaños de Andy
 
