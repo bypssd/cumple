@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Hub del Cumpleaños de Andy</title>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -18,7 +19,6 @@
             font-family: 'Segoe UI', Roboto, sans-serif;
         }
 
-        /* Fondo de pantalla */
         body {
             background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), 
                         url('https://t4.ftcdn.net/jpg/04/19/38/47/360_F_419384788_LRXd3XpqTxjnyRLethyithLwPE26ksrv.jpg');
@@ -31,15 +31,58 @@
             padding: 20px;
         }
 
-        /* LOGO */
-        .logo-vertical {
-            width: 220px; /* Un poco más grande al ser el único logo */
-            height: auto;
+        /* CONTENEDOR DEL LOGO */
+        .logo-wrapper {
+            position: relative;
             margin-bottom: 40px;
-            filter: drop-shadow(0 5px 20px rgba(0,0,0,0.6));
         }
 
-        /* CUADRO DE BIENVENIDA (MODAL) */
+        .logo-vertical {
+            width: 220px;
+            height: auto;
+            filter: drop-shadow(0 5px 20px rgba(0,0,0,0.6));
+            cursor: pointer;
+            transition: transform 0.2s ease;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+            z-index: 100;
+            display: block;
+        }
+
+        .logo-vertical:active {
+            transform: scale(1.1);
+        }
+
+        /* DEDO INDICADOR AJUSTADO */
+        .dedo-indicador {
+            position: absolute;
+            /* Posicionado a la derecha del logo */
+            bottom: 20px;
+            right: -60px; 
+            font-size: 65px; /* Un pelín más grande */
+            pointer-events: none;
+            z-index: 110;
+            opacity: 1;
+            transition: opacity 0.5s ease;
+            /* Animación que "entra" en el logo */
+            animation: pointingIn 0.7s infinite alternate ease-in-out;
+        }
+
+        @keyframes pointingIn {
+            from { 
+                transform: translateX(0); 
+            }
+            to { 
+                /* Se desplaza hacia la izquierda para meterse en el logo */
+                transform: translateX(-45px); 
+            }
+        }
+
+        .ocultar {
+            opacity: 0 !important;
+        }
+
+        /* CUADRO DE BIENVENIDA */
         #modal-bienvenida {
             position: fixed;
             top: 0;
@@ -62,19 +105,6 @@
             border: 2px solid #00d2ff;
             max-width: 400px;
             width: 90%;
-            box-shadow: 0 0 30px rgba(0, 210, 255, 0.2);
-        }
-
-        .cuadro-info h2 {
-            color: white;
-            margin-bottom: 20px;
-            font-size: 1.8rem;
-        }
-
-        .cuadro-info p {
-            color: #ccc;
-            margin-bottom: 30px;
-            line-height: 1.5;
         }
 
         .btn-empezar {
@@ -84,15 +114,8 @@
             padding: 15px 40px;
             border-radius: 50px;
             font-weight: bold;
-            font-size: 1.2rem;
             cursor: pointer;
             text-transform: uppercase;
-            transition: 0.3s;
-        }
-
-        .btn-empezar:hover {
-            transform: scale(1.1);
-            background: #ffffff;
         }
 
         /* INTERFAZ PRINCIPAL */
@@ -103,39 +126,26 @@
             width: 100%;
             max-width: 550px;
             justify-content: center;
+            z-index: 10;
         }
 
         .btn-opcion {
             color: white;
-            text-decoration: none;
-            padding: clamp(18px, 3vh, 25px);
+            padding: 20px;
             border-radius: 20px;
             font-weight: 900;
             font-size: 1.1rem;
             border: none;
             cursor: pointer;
-            transition: 0.3s;
             text-transform: uppercase;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.4);
-            display: flex;
-            align-items: center;
-            justify-content: center;
             width: 100%;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.4);
         }
 
         .btn-inv { background: linear-gradient(45deg, #00d2ff, #3a7bd5); }
         .btn-esc { background: linear-gradient(45deg, #9c27b0, #ba68c8); }
-        
-        .btn-git { 
-            background: linear-gradient(45deg, #333, #000);
-            border: 1px solid #555;
-            font-size: 0.9rem;
-            margin-top: 5px;
-        }
+        .btn-git { background: linear-gradient(45deg, #333, #000); border: 1px solid #555; font-size: 0.9rem; margin-top: 5px; }
 
-        .btn-opcion:hover { transform: translateY(-5px); filter: brightness(1.1); }
-
-        /* IFRAME FULLSCREEN */
         #contenedorGenially {
             display: none;
             position: fixed;
@@ -144,7 +154,7 @@
             width: 100%;
             height: 100%;
             background: black;
-            z-index: 5000;
+            z-index: 20000;
         }
 
         iframe { width: 100%; height: 100%; border: none; }
@@ -153,13 +163,12 @@
             position: absolute;
             top: 20px;
             left: 20px;
-            z-index: 6000;
+            z-index: 21000;
             background: rgba(0,0,0,0.8);
             color: white;
             padding: 12px 20px;
             border-radius: 50px;
             text-decoration: none;
-            font-weight: bold;
             border: 1px solid white;
         }
 
@@ -170,27 +179,30 @@
 </head>
 <body>
 
-    <!-- Cuadro de Bienvenida -->
     <div id="modal-bienvenida">
         <div class="cuadro-info">
-            <h2>¡Hola!</h2>
-            <p>Bienvenidos al hub del cumpleaños de Andy.<br>Pulsa empezar para continuar.</p>
+            <h2 style="color:white; margin-bottom:20px;">¡Hola!</h2>
+            <p style="color:#ccc; margin-bottom:30px;">Bienvenidos al hub del cumpleaños de Andy.</p>
             <button class="btn-empezar" onclick="cerrarBienvenida()">EMPEZAR</button>
         </div>
     </div>
 
-    <!-- Logo Vertical -->
-    <img src="https://file.garden/afW_Y0vtaUHOO25a/cumpleandy_logo-vertical.png" alt="Logo Cumpleaños de Andy" class="logo-vertical">
+    <!-- LOGO CON DEDO QUE ENTRA -->
+    <div class="logo-wrapper">
+        <div id="dedo" class="dedo-indicador">👈</div>
+        <img src="https://file.garden/afW_Y0vtaUHOO25a/cumpleandy_logo-vertical.png" 
+             alt="Logo" 
+             class="logo-vertical" 
+             onclick="lanzarConfeti()">
+    </div>
 
     <div class="menu-container">
         <button class="btn-opcion btn-inv" onclick="abrir('https://view.genially.com/69f5b407e5dfae9ae1897d74')">💌 INVITACIÓN</button>
         <button class="btn-opcion btn-esc" onclick="abrir('https://view.genially.com/69f624e1d0a769f8e2813e36')">🎮 ESCAPE ROOM</button>
-        
-        <!-- Botón de GitHub -->
-        <button class="btn-opcion btn-git" onclick="window.open('https://github.com/bypssd/cumple/', '_blank')">
-            📂 Visitar repo de GitHub
-        </button>
+        <button class="btn-opcion btn-git" onclick="window.open('https://github.com/bypssd/cumple/', '_blank')">📂 REPO GITHUB</button>
     </div>
+
+    <audio id="audioConfeti" src="https://file.garden/afW_Y0vtaUHOO25a/confeti.mp3"></audio>
 
     <div id="contenedorGenially">
         <a href="javascript:cerrar()" class="btn-volver">⬅ VOLVER</a>
@@ -198,10 +210,55 @@
     </div>
 
     <script>
+        const audio = document.getElementById('audioConfeti');
+        const dedo = document.getElementById('dedo');
+
+        function lanzarConfeti() {
+            dedo.classList.add('ocultar');
+            
+            audio.currentTime = 0;
+            audio.play();
+
+            // Duración de 2.5 segundos
+            const duration = 2.5 * 1000;
+            const end = Date.now() + duration;
+
+            (function frame() {
+                confetti({
+                    particleCount: 4,
+                    angle: 60,
+                    spread: 55,
+                    origin: { x: 0, y: 0.5 }
+                });
+                confetti({
+                    particleCount: 4,
+                    angle: 120,
+                    spread: 55,
+                    origin: { x: 1, y: 0.5 }
+                });
+                confetti({
+                    particleCount: 2,
+                    angle: 90,
+                    spread: 100,
+                    origin: { x: 0.5, y: 0.3 }
+                });
+
+                if (Date.now() < end) {
+                    requestAnimationFrame(frame);
+                }
+            }());
+        }
+
         function cerrarBienvenida() {
             document.getElementById('modal-bienvenida').style.opacity = '0';
             setTimeout(() => {
                 document.getElementById('modal-bienvenida').style.display = 'none';
+                
+                // Desaparece a los 3 segundos si no se ha pulsado
+                setTimeout(() => {
+                    dedo.classList.add('ocultar');
+                }, 3000);
+
             }, 500);
         }
 
@@ -214,10 +271,6 @@
             document.getElementById('contenedorGenially').style.display = 'none';
             document.getElementById('iframeG').src = "";
         }
-        
-        console.log("%c¡ALTO AHÍ, BYPASSER!", "color: #00d2ff; font-size: 25px; font-weight: bold; text-shadow: 2px 2px black;");
-        console.log("Detectado intento de intrusión en el Hub de Andy.");
-        console.log("Tu castigo por cotillear el código es traerme una tarta de chocolate.");
     </script>
 </body>
 </html>
