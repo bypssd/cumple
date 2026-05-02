@@ -5,8 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Hub del Cumpleaños de Andy</title>
     
-    <!-- FAVICON -->
+    <!-- FAVICON PARA NAVEGADOR -->
     <link rel="icon" type="image/png" href="https://file.garden/afW_Y0vtaUHOO25a/cumpleandy_logo-vertical.png">
+    
+    <!-- ICONO PARA IPHONE (PANTALLA DE INICIO) -->
+    <!-- Añadimos 'rel="apple-touch-icon"' y también una versión precomposed por si acaso -->
+    <link rel="apple-touch-icon" href="https://file.garden/afW_Y0vtaUHOO25a/cumpleandy_logo-vertical.png">
+    <link rel="apple-touch-icon-precomposed" href="https://file.garden/afW_Y0vtaUHOO25a/cumpleandy_logo-vertical.png">
+
+    <!-- CONFIGURACIÓN APP WEB iOS -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="Cumple Andy">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
@@ -20,7 +30,6 @@
             width: 100%;
             height: 100%;
             overflow: hidden;
-            /* FUENTE NORMAL DEL SISTEMA */
             font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
         }
 
@@ -46,7 +55,6 @@
             height: auto;
             filter: drop-shadow(0 5px 20px rgba(0,0,0,0.6));
             cursor: pointer;
-            /* Transición elástica para el efecto de ampliación */
             transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             user-select: none;
             -webkit-tap-highlight-color: transparent;
@@ -54,20 +62,17 @@
             display: block;
         }
 
-        /* COMPORTAMIENTO PC: Ampliar al pasar el ratón */
         @media (hover: hover) {
             .logo-vertical:hover {
                 transform: scale(1.15);
             }
         }
 
-        /* COMPORTAMIENTO PC: Hundirse al hacer clic */
         .logo-vertical:active {
             transform: scale(0.9) !important;
             transition: transform 0.1s;
         }
 
-        /* COMPORTAMIENTO MÓVIL: Clase para latido instantáneo */
         .logo-tap-mobile {
             transform: scale(1.3);
         }
@@ -227,11 +232,8 @@
         const logo = document.getElementById('logoAndy');
 
         function lanzarCelebracion() {
-            // Efecto latido (útil sobre todo en móvil donde no hay hover)
             logo.classList.add('logo-tap-mobile');
             setTimeout(() => logo.classList.remove('logo-tap-mobile'), 300);
-            
-            // Ocultar dedo
             dedo.classList.add('ocultar');
             
             audio.currentTime = 0;
