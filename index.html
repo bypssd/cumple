@@ -167,7 +167,7 @@
         </div>
     </div>
 
-    <!-- Música de fondo - Enlace actualizado -->
+    <!-- Música de fondo -->
     <audio id="musica" loop preload="auto" crossorigin="anonymous">
         <source src="https://file.garden/afW_Y0vtaUHOO25a/ElevenLabs_Aventura_Pixel.mp3" type="audio/mpeg">
     </audio>
@@ -193,16 +193,7 @@
 
         function cerrarBienvenida() {
             audio.volume = 1.0;
-            const playPromise = audio.play();
-
-            if (playPromise !== undefined) {
-                playPromise.then(_ => {
-                    console.log("Reproducción iniciada");
-                }).catch(error => {
-                    console.log("Error de reproducción:", error);
-                    audio.play();
-                });
-            }
+            audio.play().catch(error => console.log("Audio play failed:", error));
             
             document.getElementById('modal-bienvenida').style.opacity = '0';
             setTimeout(() => {
@@ -211,11 +202,15 @@
         }
 
         function abrir(url) {
+            // Pausar música al abrir experiencia
+            audio.pause();
             document.getElementById('contenedorGenially').style.display = 'block';
             document.getElementById('iframeG').src = url;
         }
 
         function cerrar() {
+            // Reanudar música al volver al menú
+            audio.play().catch(error => console.log("Audio resume failed:", error));
             document.getElementById('contenedorGenially').style.display = 'none';
             document.getElementById('iframeG').src = "";
         }
