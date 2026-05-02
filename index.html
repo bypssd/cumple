@@ -16,7 +16,7 @@
             width: 100%;
             height: 100%;
             overflow: hidden;
-            font-family: 'Segoe UI', Roboto, sans-serif;
+            font-family: "Comic Sans MS", "Comic Sans", cursive, sans-serif;
         }
 
         body {
@@ -31,7 +31,6 @@
             padding: 20px;
         }
 
-        /* CONTENEDOR DEL LOGO */
         .logo-wrapper {
             position: relative;
             margin-bottom: 40px;
@@ -42,47 +41,53 @@
             height: auto;
             filter: drop-shadow(0 5px 20px rgba(0,0,0,0.6));
             cursor: pointer;
-            transition: transform 0.2s ease;
+            /* Transición elástica para que el rebote se sienta natural */
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             user-select: none;
             -webkit-tap-highlight-color: transparent;
             z-index: 100;
             display: block;
         }
 
-        .logo-vertical:active {
-            transform: scale(1.1);
+        /* PC: Ampliar al pasar el ratón */
+        @media (hover: hover) {
+            .logo-vertical:hover {
+                transform: scale(1.15);
+            }
         }
 
-        /* DEDO INDICADOR AJUSTADO */
+        /* PC: Hundirse al hacer clic (active) */
+        .logo-vertical:active {
+            transform: scale(0.9) !important;
+            transition: transform 0.1s;
+        }
+
+        /* Clase para el efecto de "latido" en móvil */
+        .logo-tap-mobile {
+            transform: scale(1.3);
+        }
+
         .dedo-indicador {
             position: absolute;
-            /* Posicionado a la derecha del logo */
             bottom: 20px;
             right: -60px; 
-            font-size: 65px; /* Un pelín más grande */
+            font-size: 65px;
             pointer-events: none;
             z-index: 110;
             opacity: 1;
-            transition: opacity 0.5s ease;
-            /* Animación que "entra" en el logo */
+            transition: opacity 0.3s ease;
             animation: pointingIn 0.7s infinite alternate ease-in-out;
         }
 
         @keyframes pointingIn {
-            from { 
-                transform: translateX(0); 
-            }
-            to { 
-                /* Se desplaza hacia la izquierda para meterse en el logo */
-                transform: translateX(-45px); 
-            }
+            from { transform: translateX(0); }
+            to { transform: translateX(-45px); }
         }
 
         .ocultar {
             opacity: 0 !important;
         }
 
-        /* CUADRO DE BIENVENIDA */
         #modal-bienvenida {
             position: fixed;
             top: 0;
@@ -114,11 +119,11 @@
             padding: 15px 40px;
             border-radius: 50px;
             font-weight: bold;
+            font-family: "Comic Sans MS", cursive;
             cursor: pointer;
             text-transform: uppercase;
         }
 
-        /* INTERFAZ PRINCIPAL */
         .menu-container {
             display: flex;
             flex-wrap: wrap;
@@ -135,16 +140,20 @@
             border-radius: 20px;
             font-weight: 900;
             font-size: 1.1rem;
+            font-family: "Comic Sans MS", cursive;
             border: none;
             cursor: pointer;
             text-transform: uppercase;
             width: 100%;
             box-shadow: 0 10px 20px rgba(0,0,0,0.4);
+            transition: transform 0.2s;
         }
+        
+        .btn-opcion:active { transform: scale(0.95); }
 
         .btn-inv { background: linear-gradient(45deg, #00d2ff, #3a7bd5); }
         .btn-esc { background: linear-gradient(45deg, #9c27b0, #ba68c8); }
-        .btn-git { background: linear-gradient(45deg, #333, #000); border: 1px solid #555; font-size: 0.9rem; margin-top: 5px; }
+        .btn-git { background: linear-gradient(45deg, #333, #000); border: 1px solid #555; font-size: 0.8rem; margin-top: 5px; }
 
         #contenedorGenially {
             display: none;
@@ -170,6 +179,7 @@
             border-radius: 50px;
             text-decoration: none;
             border: 1px solid white;
+            font-family: "Comic Sans MS", cursive;
         }
 
         @media (min-width: 768px) {
@@ -187,13 +197,13 @@
         </div>
     </div>
 
-    <!-- LOGO CON DEDO QUE ENTRA -->
     <div class="logo-wrapper">
         <div id="dedo" class="dedo-indicador">👈</div>
         <img src="https://file.garden/afW_Y0vtaUHOO25a/cumpleandy_logo-vertical.png" 
              alt="Logo" 
              class="logo-vertical" 
-             onclick="lanzarConfeti()">
+             id="logoAndy"
+             onclick="lanzarCelebracion()">
     </div>
 
     <div class="menu-container">
@@ -212,14 +222,19 @@
     <script>
         const audio = document.getElementById('audioConfeti');
         const dedo = document.getElementById('dedo');
+        const logo = document.getElementById('logoAndy');
 
-        function lanzarConfeti() {
+        function lanzarCelebracion() {
+            // Feedback visual rápido para móvil
+            logo.classList.add('logo-tap-mobile');
+            setTimeout(() => logo.classList.remove('logo-tap-mobile'), 300);
+
+            // Ocultar dedo al tocar
             dedo.classList.add('ocultar');
             
             audio.currentTime = 0;
             audio.play();
 
-            // Duración de 2.5 segundos
             const duration = 2.5 * 1000;
             const end = Date.now() + duration;
 
@@ -253,12 +268,9 @@
             document.getElementById('modal-bienvenida').style.opacity = '0';
             setTimeout(() => {
                 document.getElementById('modal-bienvenida').style.display = 'none';
-                
-                // Desaparece a los 3 segundos si no se ha pulsado
                 setTimeout(() => {
                     dedo.classList.add('ocultar');
                 }, 3000);
-
             }, 500);
         }
 
