@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>¡El Gran Pastel de Andy!</title>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        :root {
+            --sky: #87CEEB;
+            --grass: #388e3c;
+            --hill: #4caf50;
+        }
+
+        body {
+            margin: 0;
+            overflow: hidden;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: var(--sky);
+            touch-action: manipulation;
+            user-select: none;
+        }
+
+        #game-viewport {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            background: linear-gradient(to bottom, var(--sky) 0%, #e0f7fa 100%);
+        }
+
+        /* ESCENARIO INFINITO */
+        .hill {
+            position: absolute;
+            bottom: 80px;
+            width: 200%;
+            height: 250px;
+            background: var(--hill);
+            border-radius: 50% 50% 0 0 / 100% 100% 0 0;
+            will-change: transform;
+        }
+
+        #hill1 { z-index: 2; opacity: 0.9; }
+        #hill2 { z-index: 1; opacity: 0.6; height: 350px; background: #81c784; }
+
+        #ground {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 100px;
+            background: var(--grass);
+            border-top: 8px solid #2e7d32;
+            z-index: 10;
+            box-shadow: 0 -5px 15px rgba(0,0,0,0.1);
+        }
+
+        /* PERSONAJES */
+        #gato {
+            position: absolute;
+            bottom: 100px;
+            left: 80px;
+            font-size: 65px;
+            z-index: 20;
+            transform: scaleX(-1); /* Gato mirando a la derecha */
+            will-change: transform, bottom;
+            filter: drop-shadow(2px 5px 5px rgba(0,0,0,0.2));
+        }
+
+        .obstaculo {
+            position: absolute;
+            bottom: 100px;
+            font-size: 50px;
+            z-index: 15;
+            will-change: right;
+        }
+
+        #tarta-final {
+            position: absolute;
+            bottom: 100px;
+            font-size: 85px;
+            display: none;
+            z-index: 30;
+            filter: drop-shadow(0 5px 15px rgba(0,0,0,0.3));
+        }
+
+        /* INTERFAZ */
+        #hud {
+            position: absolute;
+            top: 50px;
+            width: 100%;
+            text-align: center;
+            font-size: 22px;
+            color: #1b5e20;
+            font-weight: 900;
+            letter-spacing: 3px;
+            z-index: 100;
+            text-shadow: 0 2px 4px rgba(255,255,255,0.5);
+        }
+
+        #mensaje-final {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(255, 255, 255, 0.95);
+            padding: 40px;
+            border-radius: 35px;
+            text-align: center;
+            display: none;
+            z-index: 200;
+            box-shadow: 0 25px 60px rgba(0,0,0,0.4);
+            border: 6px solid var(--hill);
+            max-width: 80%;
+        }
+
+        .pajaro {
+            position: absolute;
+            font-size: 40px;
+            z-index: 40;
+            transition: all 0.7s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        button {
+            padding: 18px 40px;
+            border: none;
+            background: #2e7d32;
+            color: white;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-top: 25px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            transition: transform 0.2s;
+        }
+
+        button:active { transform: scale(0.95); }
+    </style>
+</head>
+<body onclick="saltar()">
+
+    <div id="game-viewport">
+        <div id="hill2" class="hill"></div>
+        <div id="hill1" class="hill"></div>
+        <div id="ground"></div>
+
+        <div id="hud">META: <span id="distancia">1000</span>M</div>
+        
+        <div id="gato">🐈</div>
+        <div id="tarta-final">🎂</div>
+        
+        <div id="mensaje-final">
+            <h1 id="titulo-final">¡TORTAZO!</h1>
+            <p id="subtitulo-final">Casi llegas...</p>
+            <button onclick="location.reload()">REINTENTAR</button>
+        </div>
+    </div>
+
+    <script>
+        const gato = document.getElementById('gato');
+        const tarta = document.getElementById('tarta-final');
+        const hudDist = document.getElementById('distancia');
+        const hills = [document.getElementById('hill1'), document.getElementById('hill2')];
+
+        let y = 0, dy = 0;
+        const gravity = 0.7;
+        const jumpPower = 16;
+        let isGrounded = true;
+        let distance = 1000;
+        let gameActive = true;
+        let nextObs = Date.now() + 1500;
+        let scrollPos = 0;
+
+        function update() {
+            if (!gameActive) return;
+
+            // 1. ESCENARIO PARALLAX
+            scrollPos -= 4;
+            hills[0].style.transform = `translateX(${(scrollPos * 1.2) % 600}px)`;
+            hills[1].style.transform = `translateX(${(scrollPos * 0.4) % 800}px)`;
+
+            // 2. PROGRESO (Ajustamos velocidad)
+            distance -= 2.5;
+            hudDist.innerText = Math.max(0, Math.floor(distance));
+
+            // 3. FÍSICA SUAVE
+            if (!isGrounded) {
+                dy -= gravity;
+                y += dy;
+                if (y <= 0) { 
+                    y = 0; dy = 0; isGrounded = true; 
+                    gato.style.transform = 'scaleX(-1) scaleY(1)'; // Reset squash
+                }
+                gato.style.bottom = (100 + y) + 'px';
+            }
+
+            // 4. GENERACIÓN INTELIGENTE DE OBSTÁCULOS
+            if (distance > 120 && Date.now() > nextObs) {
+                createObstacle();
+                nextObs = Date.now() + 1400 + Math.random() * 1600; // Espaciado cómodo
+            }
+
+            if (distance <= 0) victory();
+
+            requestAnimationFrame(update);
+        }
+
+        function saltar() {
+            if (isGrounded && gameActive) {
+                dy = jumpPower;
+                isGrounded = false;
+                gato.style.transform = 'scaleX(-1) scaleY(1.1)'; // Estirar al saltar
+            }
+        }
+
+        function createObstacle() {
+            const obs = document.createElement('div');
+            obs.className = 'obstaculo';
+            obs.innerText = '📦';
+            obs.style.right = '-100px';
+            document.getElementById('game-viewport').appendChild(obs);
+
+            let pos = -100;
+            const moveSpeed = 12;
+
+            function move() {
+                if (!gameActive) { obs.remove(); return; }
+                pos += moveSpeed;
+                obs.style.right = pos + 'px';
+
+                // COLISIÓN (Hitbox ajustada para evitar frustración)
+                const g = gato.getBoundingClientRect();
+                const o = obs.getBoundingClientRect();
+
+                if (g.right - 25 > o.left && g.left + 25 < o.right && g.bottom > o.top + 15) {
+                    gameOver();
+                    return;
+                }
+
+                if (pos < window.innerWidth + 100) {
+                    requestAnimationFrame(move);
+                } else {
+                    obs.remove();
+                }
+            }
+            requestAnimationFrame(move);
+        }
+
+        function gameOver() {
+            gameActive = false;
+            gato.innerText = '👻';
+            gato.style.transition = 'all 0.5s';
+            gato.style.bottom = '300px';
+            gato.style.opacity = '0';
+            
+            document.getElementById('titulo-final').innerText = "¡UPS! 📦";
+            document.getElementById('subtitulo-final').innerText = "Un tropezón no es caída, pero te quedaste sin tarta.";
+            document.getElementById('mensaje-final').style.display = 'block';
+        }
+
+        function victory() {
+            gameActive = false;
+            hudDist.innerText = "0";
+            tarta.style.display = 'block';
+            tarta.style.right = '100px';
+            
+            // Gato camina hacia la tarta
+            gato.style.transition = "left 1.5s cubic-bezier(0.45, 0, 0.55, 1)";
+            gato.style.left = (window.innerWidth - 300) + "px";
+
+            setTimeout(() => {
+                for(let i=0; i<4; i++) setTimeout(() => createBird(i), i * 200);
+            }, 1000);
+        }
+
+        function createBird(i) {
+            const bird = document.createElement('div');
+            bird.className = 'pajaro';
+            bird.innerText = '🐦';
+            bird.style.left = '-100px';
+            bird.style.top = (15 + (i * 15)) + '%';
+            document.getElementById('game-viewport').appendChild(bird);
+
+            setTimeout(() => {
+                const tr = tarta.getBoundingClientRect();
+                bird.style.left = tr.left + 'px';
+                bird.style.top = tr.top + 'px';
+                if (i === 3) setTimeout(splat, 700);
+            }, 100);
+        }
+
+        function splat() {
+            const gr = gato.getBoundingClientRect();
+            tarta.style.transition = "all 0.5s cubic-bezier(0.6, -0.28, 0.735, 0.045)";
+            tarta.style.left = gr.left + "px";
+            tarta.style.top = gr.top + "px";
+            tarta.style.transform = "scale(3) rotate(15deg)";
+
+            confetti({
+                particleCount: 180,
+                spread: 120,
+                origin: { x: gr.left / window.innerWidth, y: gr.top / window.innerHeight },
+                colors: ['#ffffff', '#fff4bd', '#ffacc7', '#4caf50']
+            });
+
+            setTimeout(() => {
+                gato.innerText = '😸';
+                document.getElementById('titulo-final').innerText = "¡FELIZ CUMPLEAÑOS!";
+                document.getElementById('subtitulo-final').innerText = "¡Andy, te has ganado el pastel más dulce (y pegajoso)!";
+                document.getElementById('mensaje-final').style.display = 'block';
+            }, 500);
+        }
+
+        update();
+    </script>
+</body>
+</html>
