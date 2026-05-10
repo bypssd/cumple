@@ -1,0 +1,44 @@
+{
+  "name": "Cumpleaños de Andy",
+  "short_name": "Cumple Andy",
+  "description": "Portal interactivo para el cumpleaños de Andy",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#00d2ff",
+  "icons": [
+    {
+      "src": "https://file.garden/afW_Y0vtaUHOO25a/cumpleandy_logo-vertical.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "https://file.garden/afW_Y0vtaUHOO25a/cumpleandy_logo-vertical.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "https://file.garden/afW_Y0vtaUHOO25a/captura1.png",
+      "sizes": "1080x1920",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Portada Principal"
+    },
+    {
+      "src": "https://file.garden/afW_Y0vtaUHOO25a/captura2.png",
+      "sizes": "1080x1920",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Sección de Juegos"
+    },
+    {
+      "src": "https://file.garden/afW_Y0vtaUHOO25a/captura3.png",
+      "sizes": "1080x1920",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Invitación Digital"
+    }
+  ]
+}
