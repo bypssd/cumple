@@ -249,6 +249,11 @@
         @media (min-width: 600px) {
             .btn-inv, .btn-esc { width: calc(50% - 6px); }
         }
+
+        /* --- NUEVO CSS PARA EL EFECTO DE DIFUMINADO DEL FONDO --- */
+        body {
+            transition: background-image 1.5s ease-in-out;
+        }
     </style>
 </head>
 <body>
@@ -391,6 +396,25 @@
             document.getElementById('contenedorGenially').style.display = 'none';
             document.getElementById('iframeG').src = "";
         }
+
+        // --- NUEVO SCRIPT PARA CAMBIAR LOS FONDOS EN ORDEN INVERSO ---
+        const fondosCumple = [
+            "https://file.garden/afW_Y0vtaUHOO25a/20260527_165230.jpg",
+            "https://file.garden/afW_Y0vtaUHOO25a/20260527_165241.jpg",
+            "https://file.garden/afW_Y0vtaUHOO25a/20260527_165248.jpg",
+            "https://file.garden/afW_Y0vtaUHOO25a/20260527_165237.jpg"
+        ];
+        
+        let indiceFondo = 0;
+
+        function cambiarFondoAutomatico() {
+            document.body.style.backgroundImage = `linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('${fondosCumple[indiceFondo]}')`;
+            indiceFondo = (indiceFondo + 1) % fondosCumple.length;
+        }
+
+        // Iniciar el carrusel de fondo inmediatamente y repetirlo cada 5 segundos
+        cambiarFondoAutomatico();
+        setInterval(cambiarFondoAutomatico, 5000);
     </script>
 </body>
 </html>
